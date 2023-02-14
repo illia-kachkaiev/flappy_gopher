@@ -7,9 +7,11 @@ import (
 )
 
 type character struct {
-	time     int
-	textures []*sdl.Texture
-	renderer *sdl.Renderer
+	time             int
+	textures         []*sdl.Texture
+	renderer         *sdl.Renderer
+	speed, yPosition float64
+	width, height    int32
 }
 
 func newCharacter(renderer *sdl.Renderer) (*character, error) {
@@ -22,13 +24,20 @@ func newCharacter(renderer *sdl.Renderer) (*character, error) {
 			return nil, fmt.Errorf("could not load character frame image: %v", err)
 		}
 	}
-	return &character{textures: frames, renderer: renderer}, nil
+	return &character{textures: frames, renderer: renderer, yPosition: windowHeight / 2, width: 50, height: 43}, nil
 }
 
 func (c *character) paint() error {
 	c.time++
+	c.yPosition -= c.speed
+	characterHalfHeight := c.height / 2
 
-	rect := &sdl.Rect{X: 100, Y: 130, W: 50, H: 43}
+	if c.yPosition < 0 {
+		c.speed = -c.speed
+	}
+	c.speed += gravity
+
+	rect := &sdl.Rect{X: windowWidth / 5, Y: windowHeight - int32(c.yPosition) - characterHalfHeight, W: c.width, H: c.height}
 
 	frameIdx := c.time % len(c.textures)
 	if err := c.renderer.Copy(c.textures[frameIdx], nil, rect); err != nil {
