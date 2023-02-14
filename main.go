@@ -9,6 +9,12 @@ import (
 	"time"
 )
 
+const (
+	gravity      = 9.8 // meters per square second
+	windowHeight = 600 // pixels
+	windowWidth  = 800 // pixels
+)
+
 func main() {
 	if err := run(); err != nil {
 		fmt.Fprintf(os.Stderr, "%v", err)
@@ -27,7 +33,7 @@ func run() error {
 		return fmt.Errorf("could not init ttf: %v", err)
 	}
 
-	window, renderer, err := sdl.CreateWindowAndRenderer(800, 600, sdl.WINDOW_SHOWN)
+	window, renderer, err := sdl.CreateWindowAndRenderer(windowWidth, windowHeight, sdl.WINDOW_SHOWN)
 	if err != nil {
 		return fmt.Errorf("could not create window: %v", err)
 	}
