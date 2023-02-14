@@ -2,28 +2,28 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 	"time"
 )
 
 type scene struct {
 	time       int
-	background *sdl.Texture
+	background *background
 	renderer   *sdl.Renderer
 	character  *character
 }
 
 func newScene(renderer *sdl.Renderer) (*scene, error) {
-	background, err := img.LoadTexture(renderer, "res/imgs/background.png")
+	background, err := newBackground(renderer)
 	if err != nil {
-		return nil, fmt.Errorf("could not load background image: %v", err)
+		return nil, err
 	}
+
 	character, err := newCharacter(renderer)
 	if err != nil {
 		return nil, err
 	}
+
 	return &scene{
 		background: background,
 		renderer:   renderer,
@@ -32,21 +32,22 @@ func newScene(renderer *sdl.Renderer) (*scene, error) {
 }
 
 func (s *scene) paint() error {
-	s.time++
-
 	s.renderer.Clear()
-	if err := s.renderer.Copy(s.background, nil, nil); err != nil {
-		return fmt.Errorf("could not copy background: %v", err)
+
+	if err := s.background.paint(); err != nil {
+		return err
 	}
 
-	s.character.paint()
+	if err := s.character.paint(); err != nil {
+		return err
+	}
 
 	s.renderer.Present()
 	return nil
 }
 
 func (s *scene) destroy() {
-	s.background.Destroy()
+	s.background.destroy()
 	s.character.destroy()
 }
 
