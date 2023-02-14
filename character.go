@@ -24,3 +24,21 @@ func newCharacter(renderer *sdl.Renderer) (*character, error) {
 	}
 	return &character{textures: frames, renderer: renderer}, nil
 }
+
+func (c *character) paint() error {
+	c.time++
+
+	rect := &sdl.Rect{X: 100, Y: 130, W: 50, H: 43}
+
+	frameIdx := c.time % len(c.textures)
+	if err := c.renderer.Copy(c.textures[frameIdx], nil, rect); err != nil {
+		return fmt.Errorf("could not copy character: %v", err)
+	}
+	return nil
+}
+
+func (c *character) destroy() {
+	for _, texture := range c.textures {
+		texture.Destroy()
+	}
+}
