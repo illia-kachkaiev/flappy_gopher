@@ -2,9 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
+	"math/rand"
 	"sync"
+)
+
+const (
+	pipeHeight = 300
+	pipeWidth  = 50
 )
 
 type pipe struct {
@@ -15,27 +20,15 @@ type pipe struct {
 	texture                         *sdl.Texture
 }
 
-func newPipe(renderer *sdl.Renderer) (*pipe, error) {
-	texture, err := img.LoadTexture(renderer, "res/imgs/pipe.png")
-	if err != nil {
-		return nil, fmt.Errorf("could load pipe texture: %v", err)
-	}
+func newPipe(renderer *sdl.Renderer, texture *sdl.Texture, xPosition int32) *pipe {
 	return &pipe{
-		xPosition: 400,
-		height:    300,
-		width:     50,
-		speed:     10,
-		inverted:  true,
+		xPosition: xPosition,
+		height:    100 + int32(rand.Intn(300)),
+		width:     pipeWidth,
+		inverted:  rand.Float32() > 0.5,
 		renderer:  renderer,
 		texture:   texture,
-	}, nil
-}
-
-func (p *pipe) update() {
-	p.mutex.Lock()
-	defer p.mutex.Unlock()
-
-	p.xPosition -= p.speed
+	}
 }
 
 func (p *pipe) destroy() {
@@ -70,12 +63,4 @@ func (p *pipe) paint() error {
 		return fmt.Errorf("could not copy pipe: %v", err)
 	}
 	return nil
-}
-
-func (p *pipe) restart() {
-	p.mutex.Lock()
-	defer p.mutex.Unlock()
-
-	p.xPosition = 400
-
 }

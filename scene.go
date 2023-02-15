@@ -11,12 +11,12 @@ type scene struct {
 	background *background
 	renderer   *sdl.Renderer
 	character  *character
-	pipe       *pipe
+	pipes      *pipes
 }
 
 func (s *scene) restart() {
 	s.character.restart()
-	s.pipe.restart()
+	s.pipes.restart()
 }
 
 func newScene(renderer *sdl.Renderer) (*scene, error) {
@@ -29,7 +29,7 @@ func newScene(renderer *sdl.Renderer) (*scene, error) {
 	if err != nil {
 		return nil, err
 	}
-	pipe, err := newPipe(renderer)
+	pipes, err := newPipes(renderer)
 	if err != nil {
 		return nil, err
 	}
@@ -38,14 +38,14 @@ func newScene(renderer *sdl.Renderer) (*scene, error) {
 		background: background,
 		renderer:   renderer,
 		character:  character,
-		pipe:       pipe,
+		pipes:      pipes,
 	}, nil
 }
 
 func (s *scene) update() {
-	s.character.detectCollision(s.pipe)
+	s.pipes.detectCollision(s.character)
 	s.character.update()
-	s.pipe.update()
+	s.pipes.update()
 }
 
 func (s *scene) paint() error {
@@ -58,7 +58,7 @@ func (s *scene) paint() error {
 	if err := s.character.paint(); err != nil {
 		return err
 	}
-	if err := s.pipe.paint(); err != nil {
+	if err := s.pipes.paint(); err != nil {
 		return err
 	}
 
@@ -69,7 +69,7 @@ func (s *scene) paint() error {
 func (s *scene) destroy() {
 	s.background.destroy()
 	s.character.destroy()
-	s.pipe.destroy()
+	s.pipes.destroy()
 }
 
 func (s *scene) run(events <-chan sdl.Event) <-chan error {

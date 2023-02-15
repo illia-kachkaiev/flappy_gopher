@@ -98,15 +98,3 @@ func (c *character) restart() {
 	c.dead = false
 
 }
-
-func (c *character) detectCollision(p *pipe) {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	p.mutex.Lock()
-	defer p.mutex.Unlock()
-
-	if _, isCollide := c.createRectangle().Intersect(p.createRectangle()); isCollide {
-		c.dead = true
-	}
-}
