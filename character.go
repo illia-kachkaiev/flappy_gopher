@@ -46,6 +46,10 @@ func (c *character) paint() error {
 	return nil
 }
 
+func (c *character) jump() {
+	c.speed = -25
+}
+
 func (c *character) destroy() {
 	for _, texture := range c.textures {
 		texture.Destroy()

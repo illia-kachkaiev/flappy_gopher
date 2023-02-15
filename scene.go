@@ -51,16 +51,25 @@ func (s *scene) destroy() {
 	s.character.destroy()
 }
 
-func (s *scene) run(ctx context.Context) <-chan error {
+func (s *scene) run(events <-chan sdl.Event) <-chan error {
 	errc := make(chan error)
 
 	go func() {
 		defer close(errc)
-		for range time.Tick(100 * time.Millisecond) {
+		tick := time.Tick(100 * time.Millisecond)
+		for {
 			select {
-			case <-ctx.Done():
-				return
-			default:
+			case event := <-events:
+				if isDone := s.handleEvent(event); isDone {
+					return
+				}
+			case <-tick:
+				s.update()
+				if s.character.isDead() {
+					drawTitle(s.renderer, "Game Over")
+					time.Sleep(time.Second)
+					s.restart()
+				}
 				if err := s.paint(); err != nil {
 					errc <- err
 				}
@@ -68,4 +77,17 @@ func (s *scene) run(ctx context.Context) <-chan error {
 		}
 	}()
 	return errc
+}
+
+func (s *scene) handleEvent(event sdl.Event) bool {
+	switch event.(type) {
+	case *sdl.QuitEvent:
+		return true
+	case *sdl.MouseButtonEvent:
+		s.character.jump()
+	case *sdl.MouseMotionEvent, *sdl.WindowEvent, *sdl.TouchFingerEvent:
+	default:
+		log.Printf("unknown even %T", event)
+	}
+	return false
 }

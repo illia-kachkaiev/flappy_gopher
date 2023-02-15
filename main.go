@@ -50,10 +50,17 @@ func run() error {
 	}
 	defer scene.destroy()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	time.AfterFunc(5*time.Second, cancel)
+	events := make(chan sdl.Event)
+	errc := scene.run(events)
 
-	return <-scene.run(ctx)
+	runtime.LockOSThread()
+	for {
+		select {
+		case events <- sdl.WaitEvent():
+		case err := <-errc:
+			return err
+		}
+	}
 }
 
 func drawTitle(renderer *sdl.Renderer) error {
