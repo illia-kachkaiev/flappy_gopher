@@ -1,11 +1,11 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 	"os"
+	"runtime"
 	"time"
 )
 
@@ -39,10 +39,10 @@ func run() error {
 	}
 	defer window.Destroy()
 
-	if err := drawTitle(renderer); err != nil {
+	if err := drawTitle(renderer, "Flappy Gopher!"); err != nil {
 		return fmt.Errorf("could not draw title: %v", err)
 	}
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 
 	scene, err := newScene(renderer)
 	if err != nil {
@@ -63,14 +63,14 @@ func run() error {
 	}
 }
 
-func drawTitle(renderer *sdl.Renderer) error {
+func drawTitle(renderer *sdl.Renderer, text string) error {
 	font, err := ttf.OpenFont("res/fonts/Flappy.ttf", 20)
 	if err != nil {
 		return fmt.Errorf("could not load font: %v", err)
 	}
 	defer font.Close()
 
-	surface, err := font.RenderUTF8Solid("Flappy Gopher", sdl.Color{R: 255, G: 0, B: 0, A: 255})
+	surface, err := font.RenderUTF8Solid(text, sdl.Color{R: 255, G: 0, B: 0, A: 255})
 	if err != nil {
 		return fmt.Errorf("could not render title: %v", err)
 	}
