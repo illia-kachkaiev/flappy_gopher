@@ -8,13 +8,13 @@ import (
 )
 
 type character struct {
-	mutex                    sync.RWMutex
-	time                     int
-	textures                 []*sdl.Texture
-	renderer                 *sdl.Renderer
-	speed                    float64
-	yPosition, width, height int32
-	dead                     bool
+	mutex                               sync.RWMutex
+	time                                int
+	textures                            []*sdl.Texture
+	renderer                            *sdl.Renderer
+	speed                               float64
+	yPosition, xPosition, width, height int32
+	dead                                bool
 }
 
 func newCharacter(renderer *sdl.Renderer) (*character, error) {
@@ -27,7 +27,14 @@ func newCharacter(renderer *sdl.Renderer) (*character, error) {
 			return nil, fmt.Errorf("could not load character frame image: %v", err)
 		}
 	}
-	return &character{textures: frames, renderer: renderer, yPosition: windowHeight / 2, width: 50, height: 43}, nil
+	return &character{
+		textures:  frames,
+		renderer:  renderer,
+		yPosition: windowHeight / 2,
+		xPosition: windowWidth / 10,
+		width:     50,
+		height:    43,
+	}, nil
 }
 func (c *character) update() {
 	c.mutex.Lock()
@@ -42,14 +49,21 @@ func (c *character) update() {
 	c.speed += gravity
 }
 
+func (c *character) createRectangle() *sdl.Rect {
+	return &sdl.Rect{
+		X: c.xPosition,
+		Y: windowHeight - c.yPosition - c.height/2,
+		W: c.width,
+		H: c.height,
+	}
+}
+
 func (c *character) paint() error {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
-	rect := &sdl.Rect{X: windowWidth / 10, Y: windowHeight - c.yPosition - c.height/2, W: c.width, H: c.height}
-
 	frameIdx := c.time % len(c.textures)
-	if err := c.renderer.Copy(c.textures[frameIdx], nil, rect); err != nil {
+	if err := c.renderer.Copy(c.textures[frameIdx], nil, c.createRectangle()); err != nil {
 		return fmt.Errorf("could not copy character: %v", err)
 	}
 	return nil
@@ -83,4 +97,16 @@ func (c *character) restart() {
 	c.yPosition = 300
 	c.dead = false
 
+}
+
+func (c *character) detectCollision(p *pipe) {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
+	if _, isCollide := c.createRectangle().Intersect(p.createRectangle()); isCollide {
+		c.dead = true
+	}
 }

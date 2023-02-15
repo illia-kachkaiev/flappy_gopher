@@ -82,7 +82,13 @@ func drawTitle(renderer *sdl.Renderer, text string) error {
 	}
 	defer texture.Destroy()
 
-	if err := renderer.Copy(texture, nil, nil); err != nil {
+	rect := &sdl.Rect{
+		X: 40,
+		Y: 50,
+		W: windowWidth - 80,
+		H: windowHeight - 100,
+	}
+	if err := renderer.Copy(texture, nil, rect); err != nil {
 		return fmt.Errorf("could not copy texture: %v", err)
 	}
 

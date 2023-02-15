@@ -11,10 +11,12 @@ type scene struct {
 	background *background
 	renderer   *sdl.Renderer
 	character  *character
+	pipe       *pipe
 }
 
 func (s *scene) restart() {
 	s.character.restart()
+	s.pipe.restart()
 }
 
 func newScene(renderer *sdl.Renderer) (*scene, error) {
@@ -27,16 +29,23 @@ func newScene(renderer *sdl.Renderer) (*scene, error) {
 	if err != nil {
 		return nil, err
 	}
+	pipe, err := newPipe(renderer)
+	if err != nil {
+		return nil, err
+	}
 
 	return &scene{
 		background: background,
 		renderer:   renderer,
 		character:  character,
+		pipe:       pipe,
 	}, nil
 }
 
 func (s *scene) update() {
+	s.character.detectCollision(s.pipe)
 	s.character.update()
+	s.pipe.update()
 }
 
 func (s *scene) paint() error {
@@ -49,6 +58,9 @@ func (s *scene) paint() error {
 	if err := s.character.paint(); err != nil {
 		return err
 	}
+	if err := s.pipe.paint(); err != nil {
+		return err
+	}
 
 	s.renderer.Present()
 	return nil
@@ -57,6 +69,7 @@ func (s *scene) paint() error {
 func (s *scene) destroy() {
 	s.background.destroy()
 	s.character.destroy()
+	s.pipe.destroy()
 }
 
 func (s *scene) run(events <-chan sdl.Event) <-chan error {
@@ -69,6 +82,8 @@ func (s *scene) run(events <-chan sdl.Event) <-chan error {
 			select {
 			case event := <-events:
 				if isDone := s.handleEvent(event); isDone {
+					drawTitle(s.renderer, "Good Buy")
+					time.Sleep(time.Second)
 					return
 				}
 			case <-tick:
