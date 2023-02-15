@@ -1,8 +1,8 @@
 package main
 
 import (
-	"context"
 	"github.com/veandco/go-sdl2/sdl"
+	"log"
 	"time"
 )
 
@@ -11,6 +11,10 @@ type scene struct {
 	background *background
 	renderer   *sdl.Renderer
 	character  *character
+}
+
+func (s *scene) restart() {
+	s.character.restart()
 }
 
 func newScene(renderer *sdl.Renderer) (*scene, error) {
@@ -29,6 +33,10 @@ func newScene(renderer *sdl.Renderer) (*scene, error) {
 		renderer:   renderer,
 		character:  character,
 	}, nil
+}
+
+func (s *scene) update() {
+	s.character.update()
 }
 
 func (s *scene) paint() error {
