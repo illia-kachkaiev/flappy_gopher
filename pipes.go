@@ -46,11 +46,16 @@ func (ps *pipes) update() {
 	ps.mutex.Lock()
 	defer ps.mutex.Unlock()
 
+	var remainedPipes []*pipe
 	for _, pipe := range ps.pipes {
 		pipe.mutex.Lock()
 		pipe.xPosition -= ps.speed
 		pipe.mutex.Unlock()
+		if pipe.xPosition > 0 {
+			remainedPipes = append(remainedPipes, pipe)
+		}
 	}
+	ps.pipes = remainedPipes
 }
 
 func (ps *pipes) destroy() {
