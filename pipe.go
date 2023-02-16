@@ -7,10 +7,7 @@ import (
 	"sync"
 )
 
-const (
-	pipeHeight = 300
-	pipeWidth  = 50
-)
+const pipeWidth = 50
 
 type pipe struct {
 	mutex                           sync.RWMutex
@@ -29,13 +26,6 @@ func newPipe(renderer *sdl.Renderer, texture *sdl.Texture, xPosition int32) *pip
 		renderer:  renderer,
 		texture:   texture,
 	}
-}
-
-func (p *pipe) destroy() {
-	p.mutex.Lock()
-	defer p.mutex.Unlock()
-
-	p.texture.Destroy()
 }
 
 func (p *pipe) createRectangle() *sdl.Rect {
