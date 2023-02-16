@@ -72,6 +72,18 @@ func (s *scene) destroy() {
 	s.pipes.destroy()
 }
 
+func (s *scene) advance(errc chan error) {
+	s.update()
+	if s.character.isDead() {
+		drawTitle(s.renderer, "Game Over")
+		time.Sleep(time.Second)
+		s.restart()
+	}
+	if err := s.paint(); err != nil {
+		errc <- err
+	}
+}
+
 func (s *scene) run(events <-chan sdl.Event) <-chan error {
 	errc := make(chan error)
 
@@ -87,15 +99,7 @@ func (s *scene) run(events <-chan sdl.Event) <-chan error {
 					return
 				}
 			case <-tick:
-				s.update()
-				if s.character.isDead() {
-					drawTitle(s.renderer, "Game Over")
-					time.Sleep(time.Second)
-					s.restart()
-				}
-				if err := s.paint(); err != nil {
-					errc <- err
-				}
+				s.advance(errc)
 			}
 		}
 	}()
