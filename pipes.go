@@ -22,9 +22,7 @@ func newPipes(renderer *sdl.Renderer) (*pipes, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could load pipe texture: %v", err)
 	}
-	//var newPipes []*pipe
-	//newPipe, _ := newPipe(renderer, texture, 400, false)
-	//newPipes = append(newPipes, newPipe)
+
 	ps := &pipes{
 		texture: texture,
 		speed:   25,
